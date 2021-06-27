@@ -55,46 +55,6 @@ namespace IoT_Environment.Controllers
             return results;
         }
 
-        // GET: api/Reports/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DataReport>> GetReport(int id)
-        {
-            _logger.LogInformation(ApiEventIds.ReadReport, "Getting Report id {Id}", id);
-            Report report = await _context.Reports.FindAsync(id);
-
-            if (report == null)
-            {
-                _logger.LogInformation(ApiEventIds.ReadReportNotFound, "Could not find Report id {Id}", id);
-                return NotFound();
-            }
-
-            _logger.LogInformation(ApiEventIds.ReadReport, "Loading data from Device and Relay navigational properties for Report id {Id}", id);
-            await _context.Entry(report)
-                .Reference(r => r.DeviceNavigation)
-                .Query()
-                .Include(d => d.RelayNavigation)
-                .LoadAsync();
-
-            _logger.LogInformation(ApiEventIds.ReadReport, "Loading data from DataType navigational property for Report id {Id}", id);
-            await _context.Entry(report)
-                .Reference(r => r.DataTypeNavigation)
-                .LoadAsync();
-
-            _logger.LogInformation(ApiEventIds.ReadReport, "Generating Report DTO from Report id {Id}", id);
-
-            return new DataReport
-            {
-                // null checks here?
-                DataType = report.DataTypeNavigation.Name,
-                DataUnits = report.DataTypeNavigation.Unit,
-                DeviceName = report.DeviceNavigation.Name,
-                DeviceType = report.DeviceNavigation.ConnectionType,
-                PostedOn = report.Posted,
-                RelayName = report.DeviceNavigation.RelayNavigation.Name,
-                Value = report.Value
-            };
-        }
-
         // POST: api/Reports
         [HttpPost]
         public async Task<ActionResult<Report>> PostReport(DeviceData data)
