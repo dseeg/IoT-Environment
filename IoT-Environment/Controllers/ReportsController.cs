@@ -140,6 +140,8 @@ namespace IoT_Environment.Controllers
                 Value = data.Value
             };
 
+            _context.Reports.Add(report);
+
             try
             {
                 await _context.SaveChangesAsync();
