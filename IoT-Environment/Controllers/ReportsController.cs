@@ -126,15 +126,19 @@ namespace IoT_Environment.Controllers
                 _context.Entry(relay).State = EntityState.Modified;
             }
 
-            if (await _context.DataTypes.FindAsync(data.DataType) == null)
+            DataType dataType = await _context.DataTypes.FindAsync(data.DataType);
+            if (dataType == null)
             {
                 _logger.LogInformation(ApiEventIds.CreateDataType, "Generating new Data Type: Id {DataType}", data.DataType);
-                _context.DataTypes.Add(new() { Id = data.DataType });
+                dataType = new() { Id = data.DataType };
+                _context.DataTypes.Add(dataType);
             }
+
+            _logger.LogInformation(ApiEventIds.ReadRelay, "Found DataType: Id {DataType}", dataType.Id);
 
             Report report = new()
             {
-                DataType = data.DataType,
+                DataType = dataType.Id,
                 Device = device.Id,
                 Posted = DateTime.UtcNow,
                 Value = data.Value
@@ -153,7 +157,20 @@ namespace IoT_Environment.Controllers
             }
 
             _logger.LogInformation(ApiEventIds.CreateReport, "Successfully created Report {Id} from {Data}", report.Id, data);
-            return CreatedAtAction("GetReport", new { id = report.Id }, report);
+
+            return CreatedAtAction(
+                "GetReport", 
+                new { id = report.Id },
+                new DataReport
+                {
+                    DataType = dataType.Name,
+                    DataUnits = dataType.Unit,
+                    DeviceName = device.Name,
+                    DeviceType = device.ConnectionType,
+                    PostedOn = report.Posted,
+                    RelayName = relay.Name,
+                    Value = report.Value
+                });
         }
     }
 }
