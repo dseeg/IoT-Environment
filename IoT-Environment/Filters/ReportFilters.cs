@@ -9,5 +9,10 @@ namespace IoT_Environment.Filters
     {
         public decimal LastMinutes { get; set; } = 5;
         public string DataType { get; set; }
+
+        public override string ToString()
+        {
+            return $"{nameof(LastMinutes)}={LastMinutes},{nameof(DataType)}={DataType}";
+        }
     }
 }
