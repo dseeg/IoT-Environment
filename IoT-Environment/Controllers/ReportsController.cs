@@ -49,7 +49,6 @@ namespace IoT_Environment.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DataReport>> GetReport(int id)
         {
-            // include DataType, Device, then include Relay?
             var report = await _context.Reports.FindAsync(id);
 
             if (report == null)
@@ -57,6 +56,16 @@ namespace IoT_Environment.Controllers
                 return NotFound();
             }
 
+            await _context.Entry(report)
+                .Reference(r => r.DeviceNavigation)
+                .Query()
+                .Include(d => d.RelayNavigation)
+                .LoadAsync();
+
+            await _context.Entry(report)
+                .Reference(r => r.DataTypeNavigation)
+                .LoadAsync();
+            
             return new DataReport
             {
                 // null checks here?
