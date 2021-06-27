@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IoT_Environment.Models;
+using IoT_Environment.DTO;
+using IoT_Environment.Filters;
 
 namespace IoT_Environment.Controllers
 {
@@ -22,15 +24,32 @@ namespace IoT_Environment.Controllers
 
         // GET: api/Reports
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Report>>> GetReports()
+        public async Task<ActionResult<IEnumerable<DataReport>>> GetReports([FromQuery] ReportFilters filters)
         {
-            return await _context.Reports.ToListAsync();
+            return await _context.Reports
+                .Where(r => r.Posted > DateTime.UtcNow.AddMinutes(-(double)filters.LastMinutes))
+                .Where(r => string.IsNullOrWhiteSpace(filters.DataType) || 
+                       string.Equals(r.DataTypeNavigation.Name, filters.DataType, StringComparison.OrdinalIgnoreCase)) // could InvariantCultureIgnoreCase be better here?
+                .OrderBy(r => r.Posted)
+                .Select(r => new DataReport
+                {
+                    // null checks here?
+                    DataType = r.DataTypeNavigation.Name,
+                    DataUnits = r.DataTypeNavigation.Unit,
+                    DeviceName = r.DeviceNavigation.Name,
+                    DeviceType = r.DeviceNavigation.ConnectionType,
+                    PostedOn = r.Posted,
+                    RelayName = r.DeviceNavigation.RelayNavigation.Name,
+                    Value = r.Value
+                })
+                .ToListAsync();
         }
 
         // GET: api/Reports/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Report>> GetReport(int id)
+        public async Task<ActionResult<DataReport>> GetReport(int id)
         {
+            // include DataType, Device, then include Relay?
             var report = await _context.Reports.FindAsync(id);
 
             if (report == null)
@@ -38,70 +57,29 @@ namespace IoT_Environment.Controllers
                 return NotFound();
             }
 
-            return report;
-        }
-
-        // PUT: api/Reports/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutReport(int id, Report report)
-        {
-            if (id != report.Id)
+            return new DataReport
             {
-                return BadRequest();
-            }
-
-            _context.Entry(report).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ReportExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+                // null checks here?
+                DataType = report.DataTypeNavigation.Name,
+                DataUnits = report.DataTypeNavigation.Unit,
+                DeviceName = report.DeviceNavigation.Name,
+                DeviceType = report.DeviceNavigation.ConnectionType,
+                PostedOn = report.Posted,
+                RelayName = report.DeviceNavigation.RelayNavigation.Name,
+                Value = report.Value
+            };
         }
 
         // POST: api/Reports
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Report>> PostReport(Report report)
+        public async Task<ActionResult<Report>> PostReport(DeviceData report)
         {
-            _context.Reports.Add(report);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetReport", new { id = report.Id }, report);
-        }
-
-        // DELETE: api/Reports/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReport(int id)
-        {
-            var report = await _context.Reports.FindAsync(id);
-            if (report == null)
-            {
-                return NotFound();
-            }
-
-            _context.Reports.Remove(report);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ReportExists(int id)
-        {
-            return _context.Reports.Any(e => e.Id == id);
+            //_context.Reports.Add(report);
+            //await _context.SaveChangesAsync();
+            //
+            //return CreatedAtAction("GetReport", new { id = report.Id }, report);
+            return Ok();
         }
     }
 }
