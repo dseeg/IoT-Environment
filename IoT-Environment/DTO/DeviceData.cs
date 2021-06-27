@@ -12,5 +12,10 @@ namespace IoT_Environment.DTO
         public string DeviceAddress { get; set; }
         public int DataType { get; set; }
         public decimal Value { get; set; }
+
+        public override string ToString()
+        {
+            return $"{RelayPhysicalAddress}, {RelayNetworkAddress}, {DeviceAddress}, {DataType}, {Value}";
+        }
     }
 }

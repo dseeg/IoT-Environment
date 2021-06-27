@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using IoT_Environment.Models;
 using IoT_Environment.DTO;
 using IoT_Environment.Filters;
+using Microsoft.Extensions.Logging;
+using IoT_Environment.Logging;
 
 namespace IoT_Environment.Controllers
 {
@@ -16,10 +18,12 @@ namespace IoT_Environment.Controllers
     public class ReportsController : ControllerBase
     {
         private readonly IoTContext _context;
+        private readonly ILogger<ReportsController> _logger;
 
-        public ReportsController(IoTContext context)
+        public ReportsController(IoTContext context, ILogger<ReportsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Reports
@@ -28,7 +32,7 @@ namespace IoT_Environment.Controllers
         {
             return await _context.Reports
                 .Where(r => r.Posted > DateTime.UtcNow.AddMinutes(-(double)filters.LastMinutes))
-                .Where(r => string.IsNullOrWhiteSpace(filters.DataType) || 
+                .Where(r => string.IsNullOrWhiteSpace(filters.DataType) ||
                        string.Equals(r.DataTypeNavigation.Name, filters.DataType, StringComparison.OrdinalIgnoreCase)) // could InvariantCultureIgnoreCase be better here?
                 .OrderBy(r => r.Posted)
                 .Select(r => new DataReport
@@ -49,7 +53,7 @@ namespace IoT_Environment.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DataReport>> GetReport(int id)
         {
-            var report = await _context.Reports.FindAsync(id);
+            Report report = await _context.Reports.FindAsync(id);
 
             if (report == null)
             {
@@ -65,7 +69,7 @@ namespace IoT_Environment.Controllers
             await _context.Entry(report)
                 .Reference(r => r.DataTypeNavigation)
                 .LoadAsync();
-            
+
             return new DataReport
             {
                 // null checks here?
@@ -80,15 +84,49 @@ namespace IoT_Environment.Controllers
         }
 
         // POST: api/Reports
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Report>> PostReport(DeviceData report)
+        public async Task<ActionResult<Report>> PostReport(DeviceData data)
         {
-            //_context.Reports.Add(report);
-            //await _context.SaveChangesAsync();
-            //
-            //return CreatedAtAction("GetReport", new { id = report.Id }, report);
-            return Ok();
+            Relay relay = await _context.Relays.FirstOrDefaultAsync(r => r.PhysicalAddress == data.RelayPhysicalAddress);
+            if (relay == null)
+            {
+                NotFound($"Relay {data.RelayPhysicalAddress} not registered");
+            }
+
+            Device device = await _context.Devices.FirstOrDefaultAsync(d => d.Address == data.DeviceAddress && d.RelayNavigation == relay);
+            if (device == null)
+            {
+                NotFound($"Device {data.DeviceAddress} for Relay {data.RelayPhysicalAddress} not found");
+            }
+
+            if (relay.NetworkAddress != data.RelayNetworkAddress)
+            {
+                relay.NetworkAddress = data.RelayNetworkAddress;
+                _context.Entry(relay).State = EntityState.Modified;
+            }
+
+            if (await _context.DataTypes.FindAsync(data.DataType) == null)
+                _context.DataTypes.Add(new() { Id = data.DataType });
+
+            Report report = new()
+            {
+                DataType = data.DataType,
+                Device = device.Id,
+                Posted = DateTime.UtcNow,
+                Value = data.Value
+            };
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ApiEventIds.UnknownException, ex, "Exception occured while saving changes from PostReport with device data {Data}", data);
+                return BadRequest("An unknown error occured while processing the request");
+            }
+
+            return CreatedAtAction("GetReport", new { id = report.Id }, report);
         }
     }
 }
