@@ -30,7 +30,9 @@ namespace IoT_Environment.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DataReport>>> GetReports([FromQuery] ReportFilters filters)
         {
-            return await _context.Reports
+            _logger.LogInformation(ApiEventIds.ReadAllReports, "Getting all Reports using {Filters}", filters);
+
+            List<DataReport> results = await _context.Reports
                 .Where(r => r.Posted > DateTime.UtcNow.AddMinutes(-(double)filters.LastMinutes))
                 .Where(r => string.IsNullOrWhiteSpace(filters.DataType) ||
                        string.Equals(r.DataTypeNavigation.Name, filters.DataType, StringComparison.OrdinalIgnoreCase)) // could InvariantCultureIgnoreCase be better here?
@@ -47,28 +49,38 @@ namespace IoT_Environment.Controllers
                     Value = r.Value
                 })
                 .ToListAsync();
+
+            _logger.LogInformation(ApiEventIds.ReadAllReports, "Found {Count} Reports", results.Count);
+
+            return results;
         }
 
         // GET: api/Reports/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DataReport>> GetReport(int id)
         {
+            _logger.LogInformation(ApiEventIds.ReadReport, "Getting Report id {Id}", id);
             Report report = await _context.Reports.FindAsync(id);
 
             if (report == null)
             {
+                _logger.LogInformation(ApiEventIds.ReadReportNotFound, "Could not find Report id {Id}", id);
                 return NotFound();
             }
 
+            _logger.LogInformation(ApiEventIds.ReadReport, "Loading data from Device and Relay navigational properties for Report id {Id}", id);
             await _context.Entry(report)
                 .Reference(r => r.DeviceNavigation)
                 .Query()
                 .Include(d => d.RelayNavigation)
                 .LoadAsync();
 
+            _logger.LogInformation(ApiEventIds.ReadReport, "Loading data from DataType navigational property for Report id {Id}", id);
             await _context.Entry(report)
                 .Reference(r => r.DataTypeNavigation)
                 .LoadAsync();
+
+            _logger.LogInformation(ApiEventIds.ReadReport, "Generating Report DTO from Report id {Id}", id);
 
             return new DataReport
             {
@@ -87,26 +99,38 @@ namespace IoT_Environment.Controllers
         [HttpPost]
         public async Task<ActionResult<Report>> PostReport(DeviceData data)
         {
+            _logger.LogInformation(ApiEventIds.CreateReport, "Began creating Report: {Data}", data);
+
             Relay relay = await _context.Relays.FirstOrDefaultAsync(r => r.PhysicalAddress == data.RelayPhysicalAddress);
             if (relay == null)
             {
+                _logger.LogInformation(ApiEventIds.ReadRelayNotFound, "Failed creating Report -- could not find Relay: {Address}", data.RelayPhysicalAddress);
                 NotFound($"Relay {data.RelayPhysicalAddress} not registered");
             }
+
+            _logger.LogInformation(ApiEventIds.ReadRelay, "Found Relay information: {Relay}", relay.Id);
 
             Device device = await _context.Devices.FirstOrDefaultAsync(d => d.Address == data.DeviceAddress && d.RelayNavigation == relay);
             if (device == null)
             {
+                _logger.LogInformation(ApiEventIds.ReadDeviceNotFound, "Failed creating Report -- could not find Device {Device} for Relay {Relay}", data.DeviceAddress, data.RelayPhysicalAddress);
                 NotFound($"Device {data.DeviceAddress} for Relay {data.RelayPhysicalAddress} not found");
             }
 
+            _logger.LogInformation(ApiEventIds.ReadRelay, "Found Device information: {Device}", device.Id);
+
             if (relay.NetworkAddress != data.RelayNetworkAddress)
             {
+                _logger.LogInformation(ApiEventIds.UpdateRelay, "Updating Relay network address: {Old} -> {New}", relay.NetworkAddress, data.RelayNetworkAddress);
                 relay.NetworkAddress = data.RelayNetworkAddress;
                 _context.Entry(relay).State = EntityState.Modified;
             }
 
             if (await _context.DataTypes.FindAsync(data.DataType) == null)
+            {
+                _logger.LogInformation(ApiEventIds.CreateDataType, "Generating new Data Type: {DataType}", data.DataType);
                 _context.DataTypes.Add(new() { Id = data.DataType });
+            }
 
             Report report = new()
             {
@@ -122,10 +146,11 @@ namespace IoT_Environment.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ApiEventIds.UnknownException, ex, "Exception occured while saving changes from PostReport with device data {Data}", data);
+                _logger.LogWarning(ApiEventIds.UnknownException, ex, "Exception occured while saving changes from PostReport: {Data}", data);
                 return BadRequest("An unknown error occured while processing the request");
             }
 
+            _logger.LogInformation(ApiEventIds.CreateReport, "Successfully created Report {Id} from {Data}", report.Id, data);
             return CreatedAtAction("GetReport", new { id = report.Id }, report);
         }
     }
