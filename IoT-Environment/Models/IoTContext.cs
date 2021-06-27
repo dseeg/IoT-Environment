@@ -30,17 +30,20 @@ namespace IoT_Environment.Models
             {
                 entity.ToTable("DataType");
 
-                entity.HasIndex(e => e.Name, "UC_DataType_Name")
-                    .IsUnique();
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(2000)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
-                    .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.Unit)
+                    .HasMaxLength(20)
+                    .IsUnicode();
             });
 
             modelBuilder.Entity<Device>(entity =>
