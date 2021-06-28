@@ -44,11 +44,11 @@ namespace IoT_Environment.Controllers
 
         // PUT: api/Relays/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRelay(int id, RelayRequest relayRequest)
+        public async Task<IActionResult> PutRelay(int id, RelayRequest request)
         {
-            if (id != relayRequest.Id)
+            if (id != request.Id)
             {
-                return BadRequest($"Request Id mismatch: {id}, {relayRequest.Id}");
+                return BadRequest($"Request Id mismatch: {id}, {request.Id}");
             }
 
             Relay relay = _context.Relays.Find(id);
@@ -57,12 +57,12 @@ namespace IoT_Environment.Controllers
                 return NotFound($"Could not find Relay with Id {id}");
             }
 
-            relay.Name = relayRequest.Name;
-            relay.Description = relayRequest.Description;
-            relay.NetworkAddress = relayRequest.NetworkAddress;
+            relay.Name = request.Name;
+            relay.Description = request.Description;
+            relay.NetworkAddress = request.NetworkAddress;
 
             // should physical address be read only?
-            relay.PhysicalAddress = relayRequest.PhysicalAddress;
+            relay.PhysicalAddress = request.PhysicalAddress;
 
             _context.Entry(relay).State = EntityState.Modified;
 
@@ -80,20 +80,20 @@ namespace IoT_Environment.Controllers
 
         // POST: api/Relays
         [HttpPost]
-        public async Task<ActionResult<Relay>> PostRelay(RelayRequest relayRequest)
+        public async Task<ActionResult<Relay>> PostRelay(RelayRequest request)
         {
-            if (_context.Relays.Any(r => r.PhysicalAddress == relayRequest.PhysicalAddress))
+            if (_context.Relays.Any(r => r.PhysicalAddress == request.PhysicalAddress))
             {
-                return Conflict($"Relay with physical address {relayRequest.PhysicalAddress} already exists");
+                return Conflict($"Relay with physical address {request.PhysicalAddress} already exists");
             }
 
             Relay relay = new()
             {
-                Name = relayRequest.Name,
-                NetworkAddress = relayRequest.NetworkAddress,
-                PhysicalAddress = relayRequest.PhysicalAddress,
+                Name = request.Name,
+                NetworkAddress = request.NetworkAddress,
+                PhysicalAddress = request.PhysicalAddress,
                 DateRegistered = DateTime.UtcNow,
-                Description = relayRequest.Description,
+                Description = request.Description,
                 Stale = false
             };
 
