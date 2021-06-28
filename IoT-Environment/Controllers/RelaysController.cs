@@ -36,7 +36,7 @@ namespace IoT_Environment.Controllers
 
             if (relay == null)
             {
-                return NotFound($"Could not find Relay with Id ${id}");
+                return NotFound($"Could not find Relay with Id {id}");
             }
 
             return relay;
@@ -48,13 +48,13 @@ namespace IoT_Environment.Controllers
         {
             if (id != relayRequest.Id)
             {
-                return BadRequest($"Request Id mismatch: ${id}, ${relayRequest.Id}");
+                return BadRequest($"Request Id mismatch: {id}, {relayRequest.Id}");
             }
 
             Relay relay = _context.Relays.Find(id);
             if (relay == null)
             {
-                return NotFound($"Could not find Relay with Id ${id}");
+                return NotFound($"Could not find Relay with Id {id}");
             }
 
             relay.Name = relayRequest.Name;
@@ -118,7 +118,7 @@ namespace IoT_Environment.Controllers
             var relay = await _context.Relays.FindAsync(id);
             if (relay == null)
             {
-                return NotFound($"Could not find Relay with Id ${id}");
+                return NotFound($"Could not find Relay with Id {id}");
             }
 
             _context.Relays.Remove(relay);
