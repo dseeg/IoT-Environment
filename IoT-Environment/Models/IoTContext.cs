@@ -50,6 +50,9 @@ namespace IoT_Environment.Models
             {
                 entity.ToTable("Device");
 
+                entity.HasIndex(e => new { e.Address, e.Relay }, "UC_Device_Address_Relay")
+                    .IsUnique();
+
                 entity.Property(e => e.Active).HasDefaultValueSql("('true')");
 
                 entity.Property(e => e.Address)
