@@ -69,8 +69,6 @@ namespace IoT_Environment.Controllers
                 NotFound($"Relay {data.RelayPhysicalAddress} not registered");
             }
 
-            _logger.LogInformation(ApiEventIds.ReadRelay, "Found Relay information: Id {Relay}", relay.Id);
-
             Device device = await _context.Devices.FirstOrDefaultAsync(d => d.Address == data.DeviceAddress && d.RelayNavigation == relay);
             if (device == null)
             {
@@ -78,7 +76,6 @@ namespace IoT_Environment.Controllers
                 NotFound($"Device {data.DeviceAddress} for Relay {data.RelayPhysicalAddress} not found");
             }
 
-            _logger.LogInformation(ApiEventIds.ReadRelay, "Found Device information: Id {Device}", device.Id);
 
             if (relay.TryUpdateNetworkAddress(data.RelayNetworkAddress))
             {
@@ -94,7 +91,10 @@ namespace IoT_Environment.Controllers
                 _context.DataTypes.Add(dataType);
             }
 
-            _logger.LogInformation(ApiEventIds.ReadRelay, "Found DataType: Id {DataType}", dataType.Id);
+            _logger.LogInformation(
+                ApiEventIds.CreateReport, 
+                "Found Relay {RelayAddr}, Device {DeviceAddr}, and DataType {dtId} information", 
+                relay.PhysicalAddress, device.Address, dataType.Id);
 
             Report report = new()
             {
