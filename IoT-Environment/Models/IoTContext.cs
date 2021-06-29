@@ -50,8 +50,8 @@ namespace IoT_Environment.Models
             {
                 entity.ToTable("Device");
 
-                entity.HasIndex(e => new { e.Address, e.Relay }, "UC_Device_Address_Relay")
-                    .IsUnique();
+                entity.HasAlternateKey(e => new { e.Address, e.Relay })
+                    .HasName("AK_Device_Address_Relay");
 
                 entity.Property(e => e.Active).HasDefaultValueSql("('true')");
 
@@ -72,7 +72,6 @@ namespace IoT_Environment.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
-                    .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
@@ -86,8 +85,8 @@ namespace IoT_Environment.Models
             {
                 entity.ToTable("Relay");
 
-                entity.HasIndex(e => e.PhysicalAddress, "UC_Relay_PhysicalAddress")
-                    .IsUnique();
+                entity.HasAlternateKey(e => e.PhysicalAddress)
+                    .HasName("AK_Relay_PhysicalAddress");
 
                 entity.Property(e => e.DateRegistered).HasPrecision(2);
 
@@ -96,7 +95,6 @@ namespace IoT_Environment.Models
                     .IsUnicode(false);
 
                 entity.Property(e => e.Name)
-                    .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
@@ -108,7 +106,7 @@ namespace IoT_Environment.Models
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
+                    
                 entity.Property(e => e.Stale).HasDefaultValueSql("('false')");
             });
 
@@ -118,7 +116,7 @@ namespace IoT_Environment.Models
 
                 entity.Property(e => e.Posted).HasPrecision(2);
 
-                entity.Property(e => e.Value).HasColumnType("decimal(18, 0)");
+                entity.Property(e => e.Value).HasColumnType("decimal(18, 2)");
 
                 entity.HasOne(d => d.DataTypeNavigation)
                     .WithMany(p => p.Reports)
