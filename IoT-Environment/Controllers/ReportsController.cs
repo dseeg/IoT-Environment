@@ -10,6 +10,7 @@ using IoT_Environment.DTO;
 using IoT_Environment.Filters;
 using Microsoft.Extensions.Logging;
 using IoT_Environment.Logging;
+using IoT_Environment.Extensions;
 
 namespace IoT_Environment.Controllers
 {
@@ -79,10 +80,9 @@ namespace IoT_Environment.Controllers
 
             _logger.LogInformation(ApiEventIds.ReadRelay, "Found Device information: Id {Device}", device.Id);
 
-            if (relay.NetworkAddress != data.RelayNetworkAddress)
+            if (relay.TryUpdateNetworkAddress(data.RelayNetworkAddress))
             {
                 _logger.LogInformation(ApiEventIds.UpdateRelay, "Updating Relay network address: {Old} -> {New}", relay.NetworkAddress, data.RelayNetworkAddress);
-                relay.NetworkAddress = data.RelayNetworkAddress;
                 _context.Entry(relay).State = EntityState.Modified;
             }
 

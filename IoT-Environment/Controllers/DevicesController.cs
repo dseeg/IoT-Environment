@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IoT_Environment.Models;
 using IoT_Environment.DTO;
+using IoT_Environment.Extensions;
 
 namespace IoT_Environment.Controllers
 {
@@ -63,9 +64,8 @@ namespace IoT_Environment.Controllers
                 return NotFound($"Could not find Device with Id {id}");
             }
 
-            if (relay.NetworkAddress != request.RelayNetworkAddress)
-            {
-                relay.NetworkAddress = request.RelayNetworkAddress;
+            if (relay.TryUpdateNetworkAddress(request.RelayNetworkAddress))
+            { 
                 _context.Entry(relay).State = EntityState.Modified;
             }
 
