@@ -58,7 +58,7 @@ namespace IoT_Environment.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRelay(int id, RelayRequest request)
         {
-            _logger.LogInformation(ApiEventIds.UpdateRelay, "Starting update for Relay Id {Id}", request.PhysicalAddress, id);
+            _logger.LogInformation(ApiEventIds.UpdateRelay, "Starting update for Relay Id {Id}", id);
 
             if (id != request.Id)
             {
