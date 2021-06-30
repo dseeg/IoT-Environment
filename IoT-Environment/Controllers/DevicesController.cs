@@ -65,20 +65,15 @@ namespace IoT_Environment.Controllers
                 return BadRequest($"Request Id mismatch: {id}, {request.Id}");
             }
 
-            // refactor this. I can just pull relay information from the device
-            Relay relay = await _context.Relays.FirstOrDefaultAsync(r => r.PhysicalAddress == request.RelayPhysicalAddress);
-            if (relay == null)
-            {
-                _logger.LogInformation(ApiEventIds.UpdateDevice, "Could not find Relay {Id}", id);
-                return NotFound($"Could not find Relay with network address {request.RelayPhysicalAddress}");
-            }
-
-            Device device = _context.Devices.Find(id);
+            Device device = await _context.Devices.FindAsync(id);
             if (device == null)
             {
                 _logger.LogInformation(ApiEventIds.UpdateDevice, "Could not find Device {Id}", id);
                 return NotFound($"Could not find Device with Id {id}");
             }
+
+            _context.Entry(device).Reference(d => d.RelayNavigation).Load();
+            Relay relay = device.RelayNavigation;
 
             if (relay.TryUpdateNetworkAddress(request.RelayNetworkAddress))
             {
@@ -114,7 +109,6 @@ namespace IoT_Environment.Controllers
         {
             _logger.LogInformation(ApiEventIds.CreateDevice, "Starting Device registration for {Address} on Relay {PhysAddr}", request.Address, request.RelayPhysicalAddress);
 
-            // refactor this. I can just pull relay information from the device
             Relay relay = await _context.Relays.FirstOrDefaultAsync(r => r.PhysicalAddress == request.RelayPhysicalAddress);
             if (relay == null)
             {
@@ -129,10 +123,9 @@ namespace IoT_Environment.Controllers
                 return Conflict($"Device with address {request.Address} already exists on Relay {relay.PhysicalAddress}");
             }
 
-            // refactor this. Use extension method
-            if (relay.NetworkAddress != request.RelayNetworkAddress)
+            if (relay.TryUpdateNetworkAddress(request.RelayNetworkAddress))
             {
-                relay.NetworkAddress = request.RelayNetworkAddress;
+                _logger.LogInformation(ApiEventIds.CreateDevice, "Updating Relay network address: {Old} -> {New}", relay.NetworkAddress, request.RelayNetworkAddress);
                 _context.Entry(relay).State = EntityState.Modified;
             }
 
