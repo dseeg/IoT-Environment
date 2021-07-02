@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IoT-Environment", "IoT-Environment\IoT-Environment.csproj", "{C1D7113E-AB38-4CDB-806A-23B0A203CDA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT-EnvironmentTest", "IoT-EnvironmentTest\IoT-EnvironmentTest.csproj", "{6B406180-5187-4362-8348-9FDD6F22B609}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IoT-EnvironmentTest", "IoT-EnvironmentTest\IoT-EnvironmentTest.csproj", "{D5639ECF-5984-41DD-9CC0-00353688AD2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{C1D7113E-AB38-4CDB-806A-23B0A203CDA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1D7113E-AB38-4CDB-806A-23B0A203CDA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1D7113E-AB38-4CDB-806A-23B0A203CDA0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B406180-5187-4362-8348-9FDD6F22B609}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B406180-5187-4362-8348-9FDD6F22B609}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B406180-5187-4362-8348-9FDD6F22B609}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B406180-5187-4362-8348-9FDD6F22B609}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5639ECF-5984-41DD-9CC0-00353688AD2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5639ECF-5984-41DD-9CC0-00353688AD2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5639ECF-5984-41DD-9CC0-00353688AD2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5639ECF-5984-41DD-9CC0-00353688AD2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

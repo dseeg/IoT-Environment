@@ -1,18 +1,14 @@
-using NUnit.Framework;
+using System;
+using Xunit;
 
 namespace IoT_EnvironmentTest
 {
-    public class Tests
+    public class RelaysControllerTest
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
-        [Test]
+        [Fact]
         public void Test1()
         {
-            Assert.Pass();
+
         }
     }
 }
