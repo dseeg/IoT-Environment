@@ -4,11 +4,11 @@ using System;
 
 namespace IoT_EnvironmentTest.ControllerTests
 {
-    public class RelaysControllerTest
+    public class MockIoTContext
     {
         protected DbContextOptions<IoTContext> ContextOptions { get; }
 
-        protected RelaysControllerTest(DbContextOptions<IoTContext> contextOptions)
+        protected MockIoTContext(DbContextOptions<IoTContext> contextOptions)
         {
             ContextOptions = contextOptions;
 
