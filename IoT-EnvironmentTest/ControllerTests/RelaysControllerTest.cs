@@ -22,17 +22,27 @@ namespace IoT_EnvironmentTest.ControllerTests
             context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
-            Relay relay = new()
+            Relay relay1 = new()
             {
                 DateRegistered = new DateTime(2021, 7, 1),
-                Description = "Relay description",
                 Name = "Relay name",
+                Description = "Relay description",
                 PhysicalAddress = "A1:B2:C3:D4:E5:F6",
                 NetworkAddress = "127.0.0.1",
                 Stale = false,
             };
 
-            context.Add(relay);
+            Relay relay2 = new()
+            {
+                DateRegistered = new DateTime(2021, 7, 1),
+                Name = "Relay name",
+                Description = "Relay description",
+                PhysicalAddress = "00:11:22:AA:BB:CC",
+                NetworkAddress = "127.0.0.1",
+                Stale = false
+            };
+
+            context.AddRange(relay1, relay2);
 
             context.SaveChanges();
         }
