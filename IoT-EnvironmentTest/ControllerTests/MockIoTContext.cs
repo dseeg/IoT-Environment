@@ -67,7 +67,7 @@ namespace IoT_EnvironmentTest.ControllerTests
             Device device3 = new()
             {
                 DateRegistered = new DateTime(2021, 7, 1),
-                Name = "Device 1",
+                Name = "Device 3",
                 Description = "Device description",
                 ConnectionType = "Connection type",
                 Address = "/addr/1",
