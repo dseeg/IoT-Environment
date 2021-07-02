@@ -104,6 +104,13 @@ namespace IoT_Environment.Controllers
         public async Task<ActionResult<Relay>> PostRelay(RelayRequest request)
         {
             _logger.LogInformation(ApiEventIds.CreateRelay, "Starting Relay registration for {Address}", request.PhysicalAddress);
+
+            if (string.IsNullOrWhiteSpace(request.PhysicalAddress))
+            {
+                _logger.LogInformation(ApiEventIds.CreateRelay, "Failed registering Relay: Physical Address cannot be null or whitespace", request.PhysicalAddress);
+                return BadRequest("Physical Address cannot be null or whitespace");
+            }
+
             if (_context.Relays.Any(r => r.PhysicalAddress == request.PhysicalAddress))
             {
                 _logger.LogInformation(ApiEventIds.CreateRelay, "Failed registering Relay: {Address} already exists", request.PhysicalAddress);
