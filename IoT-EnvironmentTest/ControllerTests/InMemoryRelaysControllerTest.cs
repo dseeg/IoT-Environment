@@ -80,6 +80,78 @@ namespace IoT_EnvironmentTest.ControllerTests
         }
 
         [Fact]
+        public async void Can_Put_Relay_Null_Name()
+        {
+            RelayRequest request = new()
+            {
+                Id = 1,
+                Name = null,
+                Description = "Relay Description",
+                PhysicalAddress = "A1:B2:C3:D4:E5:F6",
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PutRelay(1, request);
+            var noContentResult = actionResult as NoContentResult;
+            var relay = context.Relays.Find(1);
+
+            Assert.NotNull(noContentResult);
+            Assert.Equal(204, noContentResult.StatusCode);
+            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+        }
+
+        [Fact]
+        public async void Can_Put_Relay_Null_Description()
+        {
+            RelayRequest request = new()
+            {
+                Id = 1,
+                Name = "Relay name",
+                Description = null,
+                PhysicalAddress = "A1:B2:C3:D4:E5:F6",
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PutRelay(1, request);
+            var noContentResult = actionResult as NoContentResult;
+            var relay = context.Relays.Find(1);
+
+            Assert.NotNull(noContentResult);
+            Assert.Equal(204, noContentResult.StatusCode);
+            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+        }
+
+        [Fact]
+        public async void Can_Put_Relay_Null_NetworkAddress()
+        {
+            RelayRequest request = new()
+            {
+                Id = 1,
+                Name = "Relay name",
+                Description = "Relay Description",
+                PhysicalAddress = "A1:B2:C3:D4:E5:F6",
+                NetworkAddress = null
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PutRelay(1, request);
+            var noContentResult = actionResult as NoContentResult;
+            var relay = context.Relays.Find(1);
+
+            Assert.NotNull(noContentResult);
+            Assert.Equal(204, noContentResult.StatusCode);
+            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+        }
+
+        [Fact]
         public async void Put_Relay_Id_Mismatch_BadRequest()
         {
             RelayRequest request = new()
@@ -126,28 +198,6 @@ namespace IoT_EnvironmentTest.ControllerTests
         }
 
         [Fact]
-        public async void Put_Relay_PhysicalAddress_BadRequest()
-        {
-            RelayRequest request = new()
-            {
-                Id = 1,
-                Name = "Relay name",
-                Description = "Relay Description",
-                PhysicalAddress = "00:11:22:AA:BB:CC",
-                NetworkAddress = "127.0.0.1"
-            };
-
-            using var context = new IoTContext(ContextOptions);
-            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
-
-            var actionResult = await controller.PutRelay(1, request);
-            var badRequestResult = actionResult as BadRequestObjectResult;
-
-            Assert.NotNull(badRequestResult);
-            Assert.Equal(400, badRequestResult.StatusCode);
-        }
-
-        [Fact]
         public async void Can_Post_Relay()
         {
             RelayRequest request = new()
@@ -166,6 +216,90 @@ namespace IoT_EnvironmentTest.ControllerTests
 
             Assert.NotNull(createdAtResult);
             Assert.Equal(201, createdAtResult.StatusCode);
+        }
+
+        [Fact]
+        public async void Can_Post_Relay_Null_Name()
+        {
+            RelayRequest request = new()
+            {
+                Name = null,
+                Description = "Relay Description",
+                PhysicalAddress = "00:AA:22:BB:33:CC",
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PostRelay(request);
+            var createdAtResult = actionResult.Result as CreatedAtActionResult;
+
+            Assert.NotNull(createdAtResult);
+            Assert.Equal(201, createdAtResult.StatusCode);
+        }
+
+        [Fact]
+        public async void Can_Post_Relay_Null_Description()
+        {
+            RelayRequest request = new()
+            {
+                Name = "Relay name",
+                Description = null,
+                PhysicalAddress = "00:AA:22:BB:33:CC",
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PostRelay(request);
+            var createdAtResult = actionResult.Result as CreatedAtActionResult;
+
+            Assert.NotNull(createdAtResult);
+            Assert.Equal(201, createdAtResult.StatusCode);
+        }
+
+        [Fact]
+        public async void Can_Post_Relay_Null_NetworkAddress()
+        {
+            RelayRequest request = new()
+            {
+                Name = "Relay name",
+                Description = "Relay Description",
+                PhysicalAddress = "00:AA:22:BB:33:CC",
+                NetworkAddress = null
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PostRelay(request);
+            var createdAtResult = actionResult.Result as CreatedAtActionResult;
+
+            Assert.NotNull(createdAtResult);
+            Assert.Equal(201, createdAtResult.StatusCode);
+        }
+
+        [Fact]
+        public async void Post_Relay_Null_PhysicalAddress_BadRequest()
+        {
+            RelayRequest request = new()
+            {
+                Name = "Relay name",
+                Description = "Relay Description",
+                PhysicalAddress = null,
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PostRelay(request);
+            var badRequestResult = actionResult.Result as BadRequestObjectResult;
+
+            Assert.NotNull(badRequestResult);
+            Assert.Equal(400, badRequestResult.StatusCode);
         }
 
         [Fact]
