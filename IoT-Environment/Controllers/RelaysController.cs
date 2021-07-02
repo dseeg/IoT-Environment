@@ -62,8 +62,8 @@ namespace IoT_Environment.Controllers
 
             if (id != request.Id)
             {
-                _logger.LogInformation(ApiEventIds.UpdateRelay, "Relay update failed -- Id mismatch: {ResourceId}, {RequestId}", id, request.Id);
-                return BadRequest($"Request Id mismatch: {id}, {request.Id}");
+                _logger.LogInformation(ApiEventIds.UpdateRelay, "Relay update failed -- Id mismatch: expected {ResourceId}, was {RequestId}", id, request.Id);
+                return BadRequest($"Request Id mismatch: expected {id}, was {request.Id}");
             }
 
             Relay relay = _context.Relays.Find(id);
@@ -73,12 +73,15 @@ namespace IoT_Environment.Controllers
                 return NotFound($"Could not find Relay with Id {id}");
             }
 
+            if (relay.PhysicalAddress != request.PhysicalAddress)
+            {
+                _logger.LogInformation(ApiEventIds.UpdateRelay, "Relay update failed -- Physical Address mismatch: expected {ResPhysAddr}, was {ReqPhysAddr}", relay.PhysicalAddress, request.PhysicalAddress);
+                return BadRequest($"Request Physical Address mismatch: expected {relay.PhysicalAddress}, was {request.PhysicalAddress}");
+            }
+
             relay.Name = request.Name;
             relay.Description = request.Description;
-            relay.NetworkAddress = request.NetworkAddress;
-
-            // should physical address be read only?
-            relay.PhysicalAddress = request.PhysicalAddress;
+            relay.NetworkAddress = request.NetworkAddress;            
 
             _context.Entry(relay).State = EntityState.Modified;
 
