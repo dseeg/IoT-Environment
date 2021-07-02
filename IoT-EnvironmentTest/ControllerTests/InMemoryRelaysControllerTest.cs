@@ -100,7 +100,7 @@ namespace IoT_EnvironmentTest.ControllerTests
 
             Assert.NotNull(noContentResult);
             Assert.Equal(204, noContentResult.StatusCode);
-            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+            Assert.Null(relay.Name);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace IoT_EnvironmentTest.ControllerTests
 
             Assert.NotNull(noContentResult);
             Assert.Equal(204, noContentResult.StatusCode);
-            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+            Assert.Null(relay.Description);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace IoT_EnvironmentTest.ControllerTests
 
             Assert.NotNull(noContentResult);
             Assert.Equal(204, noContentResult.StatusCode);
-            Assert.Equal(request.NetworkAddress, relay.NetworkAddress);
+            Assert.Null(relay.NetworkAddress);
         }
 
         [Fact]
