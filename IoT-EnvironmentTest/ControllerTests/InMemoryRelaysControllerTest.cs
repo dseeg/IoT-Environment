@@ -176,6 +176,30 @@ namespace IoT_EnvironmentTest.ControllerTests
         }
 
         [Fact]
+        public async void Put_Relay_PhysicalAddress_Mismatch_BadRequest()
+        {
+            RelayRequest request = new()
+            {
+                Id = 1,
+                Name = "Relay name",
+                Description = "Relay Description",
+                PhysicalAddress = "AA:11:BB:22:CC:33",
+                NetworkAddress = "192.168.0.1"
+            };
+
+            using var context = new IoTContext(ContextOptions);
+            var controller = new RelaysController(context, NullLogger<RelaysController>.Instance);
+
+            var actionResult = await controller.PutRelay(1, request);
+            var badRequestResult = actionResult as BadRequestObjectResult;
+            var relay = context.Relays.Find(1);
+
+            Assert.NotNull(badRequestResult);
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.NotEqual(request.NetworkAddress, relay.NetworkAddress);
+        }
+
+        [Fact]
         public async void Put_Relay_NotFound()
         {
             RelayRequest request = new()
